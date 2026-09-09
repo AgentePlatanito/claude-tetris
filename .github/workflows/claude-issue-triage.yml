@@ -1,54 +1,57 @@
-name: Claude Issue Triage
+name: Claude Issue Formatter
 
 on:
   issues:
     types: [opened, edited]
 
-concurrency:
-  group: issue-triage-${{ github.event.issue.number }}
-  cancel-in-progress: true
-
 jobs:
-  triage:
+  format-issue:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       issues: write
       id-token: write
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Run Claude Issue Triage
-        id: claude-triage
+      - name: Format issue with Claude
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: "--allowedTools Bash(gh issue *)"
           prompt: |
-            You are triaging issue #${{ github.event.issue.number }} in ${{ github.repository }}.
+            You are a GitHub issue formatter for a Tetris game project (vanilla JS/HTML/CSS, no dependencies).
 
-            1. Read the issue's title and body.
-            2. Read CLAUDE.md and the relevant source files (game.js, index.html, style.css) to
-               understand this project's architecture before forming an opinion.
-            3. Apply the label(s) that best fit the issue, using GitHub's default label set
-               (bug, enhancement, question, documentation, duplicate, invalid, wontfix,
-               good first issue, help wanted). Only create a new label if none of the default
-               ones reasonably fit.
-            4. Post a general diagnosis as an issue comment, covering:
-               - A short summary of the problem/request.
-               - The likely root cause or relevant area, referencing specific files/functions
-                 (e.g. collide(), tryRotate(), clearLines(), the render/draw functions, the
-                 game loop, etc.) where applicable.
-               - What would need to change to address it.
-               Do NOT implement a fix — this is diagnosis only, to be used later as the basis
-               for the actual code change.
-               Write the comment in Markdown format that GitHub can render (e.g. headings,
-               bullet lists, and code spans/blocks for file and function names).
-            5. If Claude has already posted a diagnosis comment on this issue (this can happen
-               when the issue is edited after the first triage), update/edit that existing
-               comment instead of creating a new one, so comments don't pile up across edits.
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://code.claude.com/docs/en/cli-reference for available options
+            An issue was just ${{ github.event.action }} with the following details:
+            - Issue number: #${{ github.event.issue.number }}
+            - Title: ${{ github.event.issue.title }}
+            - Body: ${{ github.event.issue.body }}
+            - Author: ${{ github.event.issue.user.login }}
+
+            Your tasks:
+            1. **Add labels** based on the issue content. Use only these labels:
+               - `bug` — something is broken or behaving incorrectly
+               - `enhancement` — new feature or improvement request
+               - `question` — asking for help or clarification
+               - `documentation` — docs need updating
+               - `good first issue` — simple, beginner-friendly task
+               - `duplicate` — if it seems like a known/repeated problem
+
+            2. **Post a comment** on the issue that includes:
+               - A brief, friendly summary of what the issue is about (1-2 sentences)
+               - A "Formatted Report" section with:
+                 - **Type**: Bug / Feature Request / Question / Other
+                 - **Summary**: one clear sentence describing the problem or request
+                 - **Steps to reproduce** (for bugs): list them if not provided, ask the user to provide them if it's a bug
+                 - **Expected behavior** (for bugs): what should happen
+                 - **Suggested labels**: the labels you applied and why
+               - A closing note thanking the contributor
+
+            Use the `gh` CLI to apply labels and post the comment. Example commands:
+              gh issue edit ${{ github.event.issue.number }} --add-label "bug" --repo ${{ github.repository }}
+              gh issue comment ${{ github.event.issue.number }} --body "..." --repo ${{ github.repository }}
+
+            Be concise, helpful, and friendly. Do not over-engineer the response.
