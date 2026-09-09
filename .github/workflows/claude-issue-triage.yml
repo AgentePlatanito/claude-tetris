@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
 
@@ -45,6 +45,8 @@ jobs:
                - What would need to change to address it.
                Do NOT implement a fix — this is diagnosis only, to be used later as the basis
                for the actual code change.
+               Write the comment in Markdown format that GitHub can render (e.g. headings,
+               bullet lists, and code spans/blocks for file and function names).
             5. If Claude has already posted a diagnosis comment on this issue (this can happen
                when the issue is edited after the first triage), update/edit that existing
                comment instead of creating a new one, so comments don't pile up across edits.
