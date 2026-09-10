@@ -49,6 +49,22 @@
             <li><kbd>P</kbd> pausa</li>
           </ul>
         </div>
+
+        <section class="panel-section" id="leaderboard">
+          <span class="label">TOP 5</span>
+          <ol class="hs-list" id="leaderboard-list"></ol>
+          <div class="hs-stats">
+            <div class="hs-stat">
+              <span class="hs-stat-label">Mejor combo</span>
+              <span class="hs-stat-value" id="best-combo">0</span>
+            </div>
+            <div class="hs-stat">
+              <span class="hs-stat-label">Máx. líneas</span>
+              <span class="hs-stat-value" id="max-lines">0</span>
+            </div>
+          </div>
+          <button id="reset-scores-btn" class="reset-btn">Resetear records</button>
+        </section>
       </aside>
     </div>
 
@@ -56,6 +72,18 @@
       <div class="overlay-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
+
+        <!-- Local leaderboard: score entry (additive, self-contained block) -->
+        <div id="score-entry" class="hidden">
+          <p class="score-entry-label">¡Nueva puntuación alta!</p>
+          <div class="score-entry-form" id="score-entry-form">
+            <input type="text" id="player-name-input" maxlength="12" placeholder="Tu nombre" autocomplete="off" />
+            <button id="save-score-btn">Guardar</button>
+          </div>
+          <ol class="hs-list" id="overlay-leaderboard-list"></ol>
+        </div>
+        <!-- /Local leaderboard block -->
+
         <button id="restart-btn">Reiniciar</button>
       </div>
     </div>
