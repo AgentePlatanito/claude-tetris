@@ -4,17 +4,54 @@ const COLS = 10;
 const ROWS = 20;
 const BLOCK = 30;
 
-const COLORS = [
-  null,
-  '#4dd0e1', // I - cyan
-  '#ffd54f', // O - yellow
-  '#ba68c8', // T - purple
-  '#81c784', // S - green
-  '#e57373', // Z - red
-  '#90caf9', // J - pale blue
-  '#ffb74d', // L - orange
-  '#b0bec5', // N - nut (metallic gray)
-];
+const SKIN_PALETTES = {
+  retro: [
+    null,
+    '#4dd0e1', // I - cyan
+    '#ffd54f', // O - yellow
+    '#ba68c8', // T - purple
+    '#81c784', // S - green
+    '#e57373', // Z - red
+    '#90caf9', // J - pale blue
+    '#ffb74d', // L - orange
+    '#b0bec5', // N - nut (metallic gray)
+  ],
+  neon: [
+    null,
+    '#00fff9', // I - electric cyan
+    '#faff00', // O - electric yellow
+    '#ff00f7', // T - magenta
+    '#39ff14', // S - neon green
+    '#ff073a', // Z - neon red
+    '#00aaff', // J - electric blue
+    '#ff8c00', // L - neon orange
+    '#f0f0f0', // N - white/silver
+  ],
+  pastel: [
+    null,
+    '#a8dadc', // I - soft teal
+    '#ffe5a0', // O - soft yellow
+    '#d8bfd8', // T - thistle
+    '#b5e2b5', // S - soft green
+    '#f4a9a8', // Z - soft red
+    '#b8d8f0', // J - soft pale blue
+    '#ffd1a0', // L - soft orange
+    '#d3d3d8', // N - soft gray
+  ],
+  pixel: [
+    null,
+    '#00e5e5', // I
+    '#ffdd00', // O
+    '#aa00aa', // T
+    '#00aa00', // S
+    '#dd0000', // Z
+    '#0066ff', // J
+    '#ff8800', // L
+    '#999999', // N
+  ],
+};
+
+let COLORS = SKIN_PALETTES.retro;
 
 const PIECES = [
   null,
@@ -42,11 +79,14 @@ const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeSwitch = document.getElementById('theme-switch');
+const skinSelect = document.getElementById('skin-select');
 
 const THEME_KEY = 'tetris-theme';
+const SKIN_KEY = 'tetris-skin';
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 let gridColor = '#22222e';
+let currentSkin = 'retro';
 
 function applyTheme(theme) {
   document.body.classList.toggle('light', theme === 'light');
@@ -63,6 +103,30 @@ themeSwitch.addEventListener('change', () => {
   const theme = themeSwitch.checked ? 'light' : 'dark';
   localStorage.setItem(THEME_KEY, theme);
   applyTheme(theme);
+});
+
+function applySkin(skinName) {
+  currentSkin = skinName;
+  COLORS = SKIN_PALETTES[skinName] || SKIN_PALETTES.retro;
+  document.body.dataset.skin = skinName;
+  if (skinSelect) skinSelect.value = currentSkin;
+  localStorage.setItem(SKIN_KEY, currentSkin);
+  // Skins can override --grid-color via CSS, so refresh the cached value.
+  gridColor = getComputedStyle(document.body).getPropertyValue('--grid-color').trim();
+  // Redraw immediately so the change is visible without waiting for the
+  // next animation frame. Guard against calling before the first init().
+  if (current) draw();
+  if (next) drawNext();
+}
+
+function initSkin() {
+  const saved = localStorage.getItem(SKIN_KEY);
+  const skin = Object.prototype.hasOwnProperty.call(SKIN_PALETTES, saved) ? saved : 'retro';
+  applySkin(skin);
+}
+
+skinSelect.addEventListener('change', () => {
+  applySkin(skinSelect.value);
 });
 
 function createBoard() {
@@ -182,12 +246,57 @@ function updateHUD() {
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
   const color = COLORS[colorIndex];
+  const px = x * size + 1;
+  const py = y * size + 1;
+  const w = size - 2;
+  const h = size - 2;
   context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = 'rgba(255,255,255,0.12)';
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+
+  const fillBase = () => {
+    context.fillStyle = color;
+    context.fillRect(px, py, w, h);
+    context.fillStyle = 'rgba(255,255,255,0.12)';
+    context.fillRect(px, py, w, 4);
+  };
+
+  if (currentSkin === 'neon') {
+    context.shadowBlur = 12;
+    context.shadowColor = color;
+    fillBase();
+    context.shadowBlur = 0; // don't bleed glow into unrelated drawing (e.g. grid lines)
+  } else if (currentSkin === 'pastel') {
+    const r = Math.min(6, w / 2, h / 2);
+    context.fillStyle = color;
+    context.beginPath();
+    if (typeof context.roundRect === 'function') {
+      context.roundRect(px, py, w, h, r);
+    } else {
+      context.moveTo(px + r, py);
+      context.arcTo(px + w, py, px + w, py + h, r);
+      context.arcTo(px + w, py + h, px, py + h, r);
+      context.arcTo(px, py + h, px, py, r);
+      context.arcTo(px, py, px + w, py, r);
+      context.closePath();
+    }
+    context.fill();
+    context.fillStyle = 'rgba(255,255,255,0.18)';
+    context.fillRect(px + 2, py + 2, w - 4, 3);
+  } else if (currentSkin === 'pixel') {
+    fillBase();
+    // simulated pixel-art texture: a small checkerboard of dots
+    context.fillStyle = 'rgba(0,0,0,0.18)';
+    const step = Math.max(4, Math.floor(size / 5));
+    const dot = Math.max(2, Math.floor(step / 2));
+    for (let dy = 2; dy < h; dy += step) {
+      for (let dx = 2; dx < w; dx += step) {
+        context.fillRect(px + dx, py + dy, dot, dot);
+      }
+    }
+  } else {
+    // retro (default) — flat fill with a highlight strip
+    fillBase();
+  }
+
   context.globalAlpha = 1;
 }
 
@@ -325,4 +434,5 @@ document.addEventListener('keydown', e => {
 restartBtn.addEventListener('click', init);
 
 initTheme();
+initSkin();
 init();

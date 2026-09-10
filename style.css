@@ -54,6 +54,41 @@ body.light {
   --switch-knob: #3b5bdb;
 }
 
+/* ---- Skins ----
+   These override chrome variables regardless of the light/dark toggle state
+   (same selector specificity as body.light, placed after it so they win).
+   The "retro" skin intentionally has no rule here: picking it leaves the
+   existing body/body.light variables in full control. */
+body[data-skin="neon"] {
+  --bg: #000000;
+  --board-bg: #000000;
+  --board-border: #1a1a1a;
+  --grid-color: #111111;
+  --title-color: #00fff9;
+  --title-shadow: rgba(0, 255, 249, 0.6);
+  --overlay-bg: rgba(0, 0, 0, 0.85);
+}
+
+body[data-skin="pastel"] {
+  --bg: #fdf6f0;
+  --fg: #4a4a55;
+  --board-bg: #fffaf5;
+  --board-border: #f0ddd0;
+  --grid-color: #f5e8e0;
+  --title-color: #e79fb0;
+  --title-shadow: rgba(231, 159, 176, 0.35);
+  --overlay-bg: rgba(255, 250, 245, 0.85);
+}
+
+body[data-skin="pixel"] {
+  --bg: #1a1a2e;
+  --board-bg: #16162a;
+  --board-border: #0f0f1e;
+  --grid-color: #2a2a40;
+  --title-color: #ffdd00;
+  --title-shadow: rgba(255, 221, 0, 0.4);
+}
+
 body {
   background: var(--bg);
   color: var(--fg);
@@ -122,6 +157,34 @@ body {
 
 .switch input:checked + .slider::before {
   transform: translateX(18px);
+}
+
+/* ---- Selector de skin ---- */
+.skin-toggle {
+  position: absolute;
+  top: -4px;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.skin-label {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--label-color);
+  font-weight: 600;
+}
+
+#skin-select {
+  background: var(--kbd-bg);
+  color: var(--kbd-color);
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .game-title {
