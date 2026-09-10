@@ -265,3 +265,165 @@ kbd {
 #restart-btn:hover {
   background: var(--restart-hover);
 }
+
+/* ---- Leaderboard ---- */
+.hs-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+}
+
+.hs-list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.hs-list li.empty {
+  color: var(--label-color);
+  font-style: italic;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.hs-rank {
+  color: var(--label-color);
+  width: 16px;
+  flex-shrink: 0;
+}
+
+.hs-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fg);
+}
+
+.hs-score {
+  color: var(--value-color);
+  font-weight: 700;
+}
+
+.hs-list li.new-highscore {
+  background: var(--switch-knob);
+  color: var(--restart-color);
+  animation: hs-pulse 1s ease-in-out 2;
+}
+
+.hs-list li.new-highscore .hs-rank,
+.hs-list li.new-highscore .hs-name,
+.hs-list li.new-highscore .hs-score {
+  color: inherit;
+}
+
+@keyframes hs-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.hs-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--board-border);
+}
+
+.hs-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.hs-stat-label {
+  color: var(--label-color);
+}
+
+.hs-stat-value {
+  color: var(--value-color);
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
+}
+
+.reset-btn {
+  margin-top: 8px;
+  background: transparent;
+  color: var(--controls-color);
+  border: 1px solid var(--board-border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 10px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.reset-btn:hover {
+  border-color: var(--overlay-title-color);
+  color: var(--overlay-title-color);
+}
+
+/* ---- Score entry (game over new high score) ---- */
+#score-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 220px;
+}
+
+#score-entry.hidden {
+  display: none;
+}
+
+.score-entry-label {
+  font-size: 12px;
+  color: var(--overlay-score-color);
+  font-weight: 700;
+}
+
+.score-entry-form {
+  display: flex;
+  gap: 6px;
+}
+
+.score-entry-form.hidden {
+  display: none;
+}
+
+#player-name-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--board-bg);
+  border: 1px solid var(--board-border);
+  border-radius: 4px;
+  color: var(--fg);
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+#player-name-input:focus {
+  outline: 1px solid var(--value-color);
+}
+
+#save-score-btn {
+  background: var(--restart-bg);
+  color: var(--restart-color);
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#save-score-btn:hover {
+  background: var(--restart-hover);
+}
